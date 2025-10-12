@@ -14,8 +14,8 @@ PROMPT_ID = "pmpt_68d708122c0c81979c4ad6ad41ebc4ec0351f203636fba6f"
 
 # === Calibrated from your sample API usage ===
 MAX_TOKENS = 40
-PROMPT_TOKENS = 1920            # measured once from a real call
-OVERHEAD_TOKENS = 165        # measured once from a real call
+PROMPT_TOKENS = 1940            # measured once from a real call
+OVERHEAD_TOKENS = 145        # measured once from a real call
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

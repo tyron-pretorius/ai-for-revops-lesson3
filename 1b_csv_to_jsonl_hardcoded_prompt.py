@@ -13,8 +13,8 @@ MAX_LINES_PER_BATCH = 50000
 
 # === Calibrated from your sample API usage ===
 MAX_TOKENS = 40
-PROMPT_TOKENS = 1920            # measured once from a real call
-OVERHEAD_TOKENS = 165        # measured once from a real call
+PROMPT_TOKENS = 1940            # measured once from a real call
+OVERHEAD_TOKENS = 145        # measured once from a real call
 
 PROMPT = """You are a digital marketing source classifier. Given a single free‑text answer to “How did you hear about Telnyx?”, output a JSON object with:
 
