@@ -23,7 +23,7 @@ response = client.batches.create(
     endpoint="/v1/responses",
     completion_window="24h",
     metadata={
-        "description": "Test 10"
+        "description": "3 values with prompt id and gpt5 1000 max tokens"
     }
 )
 
