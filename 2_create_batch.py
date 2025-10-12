@@ -10,7 +10,7 @@ file_path = os.path.join(current_dir, "hear_about_batch_api_0.jsonl")
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 batch_input_file = client.files.create(
-    file=open(file_path, "rb"), #batch_68e975fc7ce88190b8521bf2f1568896
+    file=open(file_path, "rb"),
     purpose="batch"
 )
 
@@ -23,7 +23,7 @@ response = client.batches.create(
     endpoint="/v1/responses",
     completion_window="24h",
     metadata={
-        "description": "3 values with prompt id and gpt5 1000 max tokens"
+        "description": "3 values with prompt id and gpt5 100 max tokens"
     }
 )
 
