@@ -13,8 +13,8 @@ MAX_LINES_PER_BATCH = 50000
 
 # === Calibrated from your sample API usage ===
 MAX_TOKENS = 40
-CACHED_PROMPT_TOKENS = 1920            # measured once from a real call
-NONCACHED_OVERHEAD_TOKENS = 165        # measured once from a real call
+PROMPT_TOKENS = 1920            # measured once from a real call
+OVERHEAD_TOKENS = 165        # measured once from a real call
 
 PROMPT = """You are a digital marketing source classifier. Given a single free‑text answer to “How did you hear about Telnyx?”, output a JSON object with:
 
@@ -193,7 +193,7 @@ def estimate_request_tokens(json_entry: dict) -> int:
     body = json_entry.get("body", {})
     t_input = estimate_tokens(body.get("input", ""))
 
-    tokens = t_input + NONCACHED_OVERHEAD_TOKENS + CACHED_PROMPT_TOKENS + MAX_TOKENS
+    tokens = t_input + OVERHEAD_TOKENS + PROMPT_TOKENS + MAX_TOKENS
 
     return tokens
 
