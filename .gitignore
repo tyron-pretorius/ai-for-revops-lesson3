@@ -1,0 +1,52 @@
+# Environment variables
+.env
+
+# Batch processing files
+latest_batch_id.txt
+latest_output_file_id.txt
+
+# Data files (CSV, JSONL, output files)
+*.csv
+*.jsonl
+*.json
+
+# Text files
+*.txt
+!requirements.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
