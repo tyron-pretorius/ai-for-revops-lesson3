@@ -8,20 +8,13 @@ INPUT_CSV =  os.path.join(OUTPUT_DIR, "contacts_export.csv")
 
 BASE_MODEL = "gpt-4o"  # token estimator
 MODEL = "ft:gpt-4.1-2025-04-14:telnyx-official:ha-20250927:CKdQE14N"
-MAX_TOKENS_PER_BATCH = 15000000000 #from https://platform.openai.com/settings/organization/limits
+MAX_TOKENS_PER_BATCH = 1500000 #from https://platform.openai.com/settings/organization/limits
 MAX_LINES_PER_BATCH = 50000
-PROMPT_ID = "pmpt_68d708122c0c81979c4ad6ad41ebc4ec0351f203636fba6f"
-MAX_TOKENS = 40
 
 # === Calibrated from your sample API usage ===
-# usage.input_tokens = 2087; usage.input_tokens_details.cached_tokens = 1920
-# -> Non-cached overhead ≈ 2087 - 1920 - tokens(input_text) ~= 167 when input empty.
+MAX_TOKENS = 40
 CACHED_PROMPT_TOKENS = 1920            # measured once from a real call
-NONCACHED_OVERHEAD_TOKENS = 165        # measured once from a real call with empty input
-
-# If True: add the cached prompt tokens only ONCE per batch (recommended).
-# If False: add the cached prompt tokens to EVERY request (very conservative).
-ASSUME_PROMPT_CACHED = True
+NONCACHED_OVERHEAD_TOKENS = 165        # measured once from a real call
 
 PROMPT = """You are a digital marketing source classifier. Given a single free‑text answer to “How did you hear about Telnyx?”, output a JSON object with:
 
@@ -195,22 +188,12 @@ def estimate_tokens(text: str) -> int:
         return 0
     return len(enc.encode(str(text)))
 
-def estimate_request_tokens(json_entry: dict, is_first_in_batch: bool) -> int:
-    """
-    Estimate request tokens for batching:
-      tokens ~= tokens(input) + max_output + NONCACHED_OVERHEAD_TOKENS
-      + (CACHED_PROMPT_TOKENS once per batch if ASSUME_PROMPT_CACHED else each request)
-    """
+def estimate_request_tokens(json_entry: dict) -> int:
+
     body = json_entry.get("body", {})
     t_input = estimate_tokens(body.get("input", ""))
 
-    tokens = t_input + MAX_TOKENS + NONCACHED_OVERHEAD_TOKENS
-
-    if ASSUME_PROMPT_CACHED:
-        if is_first_in_batch:
-            tokens += CACHED_PROMPT_TOKENS
-    else:
-        tokens += CACHED_PROMPT_TOKENS
+    tokens = t_input + NONCACHED_OVERHEAD_TOKENS + CACHED_PROMPT_TOKENS + MAX_TOKENS
 
     return tokens
 
@@ -254,8 +237,7 @@ def process_csv(input_csv, start_row=0, end_row=3):
             json_entry = create_json_entry(row)
 
             # Predict tokens if we were to add this as the *next* item in the batch
-            is_first_in_batch = (len(batch) == 0)
-            req_tokens = estimate_request_tokens(json_entry, is_first_in_batch=is_first_in_batch)
+            req_tokens = estimate_request_tokens(json_entry)
 
             # If adding this item would exceed token/line limits, flush the current batch first
             if batch and (
@@ -266,8 +248,6 @@ def process_csv(input_csv, start_row=0, end_row=3):
                 batch_index += 1
                 batch = []
                 batch_token_count = 0
-                # Recompute req_tokens for the new batch's first-line case
-                req_tokens = estimate_request_tokens(json_entry, is_first_in_batch=True)
 
             # Edge case: single request larger than budget; write it alone to avoid blocking
             if not batch and req_tokens > MAX_TOKENS_PER_BATCH:
@@ -283,25 +263,3 @@ def process_csv(input_csv, start_row=0, end_row=3):
 
 if __name__ == "__main__":
   process_csv(INPUT_CSV)
-#   from dotenv import load_dotenv
-#   from openai import OpenAI
-
-# # Load environment variables from .env file
-#   load_dotenv()
-#   client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-#   resp = client.responses.create(
-#   model="ft:gpt-4.1-2025-04-14:telnyx-official:ha-20250927:CKdQE14N",
-#   instructions=PROMPT,
-#   input="Web",
-#   temperature=0,
-#   max_output_tokens=40,
-#   text={"format": {
-#             "type": "json_schema",
-#             "name": "telnyx_hear_source_extraction_v1",
-#             "strict": True,
-#             "schema": JSON_SCHEMA,
-#         }}
-# )
-  
-#   print(resp.usage, resp.output[0].content[0].text)

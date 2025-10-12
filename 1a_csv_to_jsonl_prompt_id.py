@@ -7,13 +7,13 @@ OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPUT_CSV =  os.path.join(OUTPUT_DIR, "contacts_export.csv")
 
 BASE_MODEL = "gpt-4o"  # token estimator
-MODEL = "gpt-4o"
-MAX_TOKENS_PER_BATCH = 15000000000 #from https://platform.openai.com/settings/organization/limits
+MODEL = "gpt-5"
+MAX_TOKENS_PER_BATCH = 1500000 #from https://platform.openai.com/settings/organization/limits
 MAX_LINES_PER_BATCH = 50000
 PROMPT_ID = "pmpt_68d708122c0c81979c4ad6ad41ebc4ec0351f203636fba6f"
-MAX_TOKENS = 40
 
 # === Calibrated from your sample API usage ===
+MAX_TOKENS = 40
 CACHED_PROMPT_TOKENS = 1920            # measured once from a real call
 NONCACHED_OVERHEAD_TOKENS = 165        # measured once from a real call
 
