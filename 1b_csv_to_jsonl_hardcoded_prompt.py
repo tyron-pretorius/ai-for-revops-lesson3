@@ -12,11 +12,7 @@ MAX_TOKENS_PER_BATCH = 1500000 #from https://platform.openai.com/settings/organi
 MAX_LINES_PER_BATCH = 50000
 
 # === Calibrated from your sample API usage ===
-<<<<<<< HEAD
 MAX_TOKENS = 100
-=======
-MAX_TOKENS = 40
->>>>>>> 4135f2553025922dd9b45ef3d5730c235965996e
 PROMPT_TOKENS = 1940            # measured once from a real call
 OVERHEAD_TOKENS = 145        # measured once from a real call
 
