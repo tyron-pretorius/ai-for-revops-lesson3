@@ -4,18 +4,18 @@ import os
 import tiktoken
 
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
-INPUT_CSV =  os.path.join(OUTPUT_DIR, "contacts_export.csv")
+INPUT_CSV =  os.path.join(OUTPUT_DIR, "Input.csv")
 
 BASE_MODEL = "gpt-4o"  # token estimator
 MODEL = "gpt-5"
 MAX_TOKENS_PER_BATCH = 1500000 #from https://platform.openai.com/settings/organization/limits
 MAX_LINES_PER_BATCH = 50000
-PROMPT_ID = "pmpt_68d708122c0c81979c4ad6ad41ebc4ec0351f203636fba6f"
+PROMPT_ID = "pmpt_68df1b8d8d2c819381cee34b826632170d9dc7e1b8052f56"
 
 # === Calibrated from your sample API usage ===
-MAX_TOKENS = 40
-CACHED_PROMPT_TOKENS = 1920            # measured once from a real call
-NONCACHED_OVERHEAD_TOKENS = 165        # measured once from a real call
+MAX_TOKENS = 100
+PROMPT_TOKENS = 1940            # measured once from a real call
+OVERHEAD_TOKENS = 145        # measured once from a real call
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -32,7 +32,7 @@ def estimate_request_tokens(json_entry: dict) -> int:
     body = json_entry.get("body", {})
     t_input = estimate_tokens(body.get("input", ""))
 
-    tokens = t_input + NONCACHED_OVERHEAD_TOKENS + CACHED_PROMPT_TOKENS + MAX_TOKENS
+    tokens = t_input + OVERHEAD_TOKENS + PROMPT_TOKENS + MAX_TOKENS
 
     return tokens
 
@@ -45,7 +45,6 @@ def create_json_entry(row):
             "model": MODEL,
             "prompt": {"id": PROMPT_ID},
             "input": row["how_hear"],
-            "temperature": 0,
             "max_output_tokens": MAX_TOKENS,
         }
     }
@@ -56,7 +55,7 @@ def write_batch(batch, index):
         for item in batch:
             outfile.write(json.dumps(item, ensure_ascii=False) + '\n')
 
-def process_csv(input_csv, start_row=0, end_row=1000):
+def process_csv(input_csv, start_row=0, end_row=None):
     with open(input_csv, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         all_rows = list(reader)

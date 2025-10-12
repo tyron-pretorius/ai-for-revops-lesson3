@@ -4,17 +4,17 @@ import os
 import tiktoken
 
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
-INPUT_CSV =  os.path.join(OUTPUT_DIR, "contacts_export.csv")
+INPUT_CSV =  os.path.join(OUTPUT_DIR, "Input.csv")
 
 BASE_MODEL = "gpt-4o"  # token estimator
-MODEL = "ft:gpt-4.1-2025-04-14:telnyx-official:ha-20250927:CKdQE14N"
+MODEL = "gpt-5"
 MAX_TOKENS_PER_BATCH = 1500000 #from https://platform.openai.com/settings/organization/limits
 MAX_LINES_PER_BATCH = 50000
 
 # === Calibrated from your sample API usage ===
-MAX_TOKENS = 40
-CACHED_PROMPT_TOKENS = 1920            # measured once from a real call
-NONCACHED_OVERHEAD_TOKENS = 165        # measured once from a real call
+MAX_TOKENS = 100
+PROMPT_TOKENS = 1940            # measured once from a real call
+OVERHEAD_TOKENS = 145        # measured once from a real call
 
 PROMPT = """You are a digital marketing source classifier. Given a single free‑text answer to “How did you hear about Telnyx?”, output a JSON object with:
 
@@ -193,7 +193,7 @@ def estimate_request_tokens(json_entry: dict) -> int:
     body = json_entry.get("body", {})
     t_input = estimate_tokens(body.get("input", ""))
 
-    tokens = t_input + NONCACHED_OVERHEAD_TOKENS + CACHED_PROMPT_TOKENS + MAX_TOKENS
+    tokens = t_input + OVERHEAD_TOKENS + PROMPT_TOKENS + MAX_TOKENS
 
     return tokens
 
@@ -206,7 +206,6 @@ def create_json_entry(row):
             "model": MODEL,
             "instructions": PROMPT,
             "input": row["how_hear"],
-            "temperature": 0,
             "max_output_tokens": MAX_TOKENS,
             "text":{"format": {
             "type": "json_schema",
@@ -223,7 +222,7 @@ def write_batch(batch, index):
         for item in batch:
             outfile.write(json.dumps(item, ensure_ascii=False) + '\n')
 
-def process_csv(input_csv, start_row=0, end_row=3):
+def process_csv(input_csv, start_row=0, end_row=None):
     with open(input_csv, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         all_rows = list(reader)
@@ -262,4 +261,4 @@ def process_csv(input_csv, start_row=0, end_row=3):
             write_batch(batch, batch_index)
 
 if __name__ == "__main__":
-  process_csv(INPUT_CSV)
+  process_csv(INPUT_CSV, start_row=0, end_row=3)

@@ -37,7 +37,14 @@ for item in data:
     custom_id = item.get("custom_id")
     response_body = item["response"]["body"]
     
-    content = response_body["output"][0]["content"][0]["text"]
+    # Find the message output (skip reasoning outputs)
+    message_output = None
+    for output_item in response_body["output"]:
+        if output_item.get("type") == "message" and "content" in output_item:
+            message_output = output_item
+            break
+    
+    content = message_output["content"][0]["text"]
     parsed = ast.literal_eval(content)
     hear_source = parsed.get('hear_source', '')
     hear_source_detail = parsed.get('hear_source_detail', '')
@@ -49,8 +56,8 @@ for item in data:
     total_tokens = usage.get("total_tokens", 0)
     
     # Calculate costs (matching poll_batch.py pricing)
-    input_cost_per_million = 1.0  # $1 per million input tokens
-    output_cost_per_million = 4.0  # $4 per million output tokens
+    input_cost_per_million = 0.625  # $0.625 per million input tokens
+    output_cost_per_million = 5.0  # $5 per million output tokens
     cost_prompt = (prompt_tokens / 1_000_000) * input_cost_per_million
     cost_completion = (completion_tokens / 1_000_000) * output_cost_per_million
     total_cost = cost_prompt + cost_completion
@@ -69,7 +76,7 @@ for item in data:
 df_new = pd.DataFrame(records)
 
 # Load existing CSV
-input_path = os.path.join(current_dir,"contacts_export.csv")
+input_path = os.path.join(current_dir,"Input.csv")
 output_path = os.path.join(current_dir,"output_hear_about.csv")
 if os.path.exists(input_path):
     df_existing = pd.read_csv(input_path)

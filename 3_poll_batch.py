@@ -13,8 +13,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 batch_id_file = os.path.join(current_dir, "latest_batch_id.txt")
 
 #https://platform.openai.com/docs/pricing?latest-pricing=batch
-input_cost_per_million = 1.0  # $1 per million input tokens
-output_cost_per_million = 4.0  # $4 per million output tokens
+input_cost_per_million = 0.625  # $0.625 per million input tokens
+output_cost_per_million = 5.0  # $5 per million output tokens
 
 
 with open(batch_id_file, "r") as f:
@@ -36,9 +36,9 @@ if batch.status == "completed" and batch.usage:
     print(f"\nOutput file ID: {output_file_id}")
     print(f"Output file ID saved to: {output_file_id_file}")
     
-    input_tokens = batch.usage.input_tokens
-    output_tokens = batch.usage.output_tokens
-    total_tokens = batch.usage.total_tokens
+    input_tokens = batch.usage["input_tokens"]
+    output_tokens = batch.usage["output_tokens"]
+    total_tokens = batch.usage["total_tokens"]
     
     # Calculate costs
     input_cost = (input_tokens / 1_000_000) * input_cost_per_million
